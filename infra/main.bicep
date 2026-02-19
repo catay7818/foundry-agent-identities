@@ -56,6 +56,8 @@ param logAnalyticsName string = ''
 param resourceGroupName string = ''
 param storageAccountName string = ''
 param vNetName string = ''
+param keyVaultName string = ''
+param foundryName string = ''
 @description('Id of the user identity to be used for testing and debugging. This is not required in production. Leave empty if not needed.')
 param principalId string = deployer().objectId
 // Entra ID authentication parameters
@@ -159,6 +161,26 @@ module storage 'br/public:avm/res/storage/storage-account:0.8.3' = {
   }
 }
 
+// Key Vault for storing secrets
+module keyVault 'br/public:avm/res/key-vault/vault:0.12.0' = {
+  name: 'keyVault'
+  scope: rg
+  params: {
+    name: !empty(keyVaultName) ? keyVaultName : '${abbrs.keyVaultVaults}${resourceToken}'
+    location: location
+    tags: tags
+    enableRbacAuthorization: true
+    enableSoftDelete: true
+    softDeleteRetentionInDays: 90
+    enablePurgeProtection: true
+    publicNetworkAccess: 'Enabled'
+    networkAcls: {
+      defaultAction: 'Allow'
+      bypass: 'AzureServices'
+    }
+  }
+}
+
 // Define the configuration object locally to pass to the modules
 var storageEndpointConfig = {
   enableBlob: true  // Required for AzureWebJobsStorage, .zip deployment, Event Hubs trigger and Timer trigger checkpointing
@@ -234,8 +256,25 @@ module monitoring 'br/public:avm/res/insights/component:0.6.0' = {
   }
 }
 
+// Azure Foundry for AI workloads
+module foundry './foundry/foundry.bicep' = {
+  name: 'foundry'
+  scope: rg
+  params: {
+    foundryName: !empty(foundryName) ? foundryName : '${abbrs.cognitiveServicesAccounts}${resourceToken}'
+    location: location
+    keyVaultName: keyVault.outputs.name
+    storageAccountName: storage.outputs.name
+    appInsightsName: monitoring.outputs.name
+    disableLocalAuth: false
+  }
+}
+
 // App outputs
 output AZURE_LOCATION string = location
 output AZURE_TENANT_ID string = tenant().tenantId
 output SERVICE_API_NAME string = api.outputs.SERVICE_API_NAME
 output AZURE_FUNCTION_NAME string = api.outputs.SERVICE_API_NAME
+output FOUNDRY_NAME string = foundry.outputs.foundryName
+output FOUNDRY_ID string = foundry.outputs.foundryId
+output KEY_VAULT_NAME string = keyVault.outputs.name
