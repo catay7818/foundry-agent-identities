@@ -1,0 +1,152 @@
+{
+    "openapi": "3.0.3",
+    "info": {
+        "title": "Foundry Agent Identities API",
+        "description": "Azure Functions API for managing agent identities",
+        "version": "1.0.0",
+        "contact": {
+            "name": "API Support"
+        },
+        "license": {
+            "name": "MIT",
+            "url": "https://opensource.org/licenses/MIT"
+        }
+    },
+    "servers": [
+        {
+            "url": "http://func-api-pieyj7uujdyyo.azurewebsites.net/api",
+            "description": "Azure Functions hosted server"
+        }
+    ],
+    "paths": {
+        "/httpget": {
+            "get": {
+                "summary": "Get greeting message",
+                "description": "Returns a greeting message, optionally personalized with a name",
+                "operationId": "httpget",
+                "tags": [
+                    "Greetings"
+                ],
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "description": "Name to personalize the greeting",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "John"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "text/plain": {
+                                "schema": {
+                                    "type": "string"
+                                },
+                                "examples": {
+                                    "default": {
+                                        "value": "Hello, World.",
+                                        "summary": "Default greeting"
+                                    },
+                                    "personalized": {
+                                        "value": "Hello, John.",
+                                        "summary": "Personalized greeting"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/httppost": {
+            "post": {
+                "summary": "Post person information",
+                "description": "Accepts person information (name and age) and returns a personalized greeting with age",
+                "operationId": "httppost",
+                "tags": [
+                    "Greetings"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Person"
+                            },
+                            "examples": {
+                                "valid": {
+                                    "value": {
+                                        "name": "Awesome Developer",
+                                        "age": 25
+                                    },
+                                    "summary": "Valid person data"
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "text/plain": {
+                                "schema": {
+                                    "type": "string"
+                                },
+                                "example": "Hello, Awesome Developer! You are 25 years old."
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - missing or invalid name/age",
+                        "content": {
+                            "text/plain": {
+                                "schema": {
+                                    "type": "string"
+                                },
+                                "example": "Please provide both name and age in the request body."
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Person": {
+                "type": "object",
+                "required": [
+                    "name",
+                    "age"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "Person's name",
+                        "example": "Awesome Developer",
+                        "minLength": 1
+                    },
+                    "age": {
+                        "type": "integer",
+                        "description": "Person's age",
+                        "example": 25,
+                        "minimum": 1,
+                        "maximum": 150
+                    }
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Greetings",
+            "description": "Greeting endpoints"
+        }
+    ]
+}
