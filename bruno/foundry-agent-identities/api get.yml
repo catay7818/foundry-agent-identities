@@ -1,0 +1,15 @@
+info:
+  name: api get
+  type: http
+  seq: 1
+
+http:
+  method: GET
+  url: http://localhost:7071/api/httpget
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
