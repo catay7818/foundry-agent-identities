@@ -58,6 +58,11 @@ param storageAccountName string = ''
 param vNetName string = ''
 @description('Id of the user identity to be used for testing and debugging. This is not required in production. Leave empty if not needed.')
 param principalId string = deployer().objectId
+// Entra ID authentication parameters
+param enableEntraAuth bool = false
+param entraAuthClientId string = ''
+param entraAuthTenantId string = tenant().tenantId
+param entraAuthAllowedAudiences array = []
 
 var abbrs = loadJsonContent('./abbreviations.json')
 var resourceToken = toLower(uniqueString(subscription().id, environmentName, location))
@@ -121,6 +126,10 @@ module api './app/api.bicep' = {
     appSettings: {
     }
     virtualNetworkSubnetId: vnetEnabled ? serviceVirtualNetwork.outputs.appSubnetID : ''
+    enableEntraAuth: enableEntraAuth
+    entraAuthTenantId: entraAuthTenantId
+    entraAuthClientId: entraAuthClientId
+    entraAuthAllowedAudiences: entraAuthAllowedAudiences
   }
 }
 
@@ -212,7 +221,7 @@ module logAnalytics 'br/public:avm/res/operational-insights/workspace:0.11.1' = 
     dataRetention: 30
   }
 }
- 
+
 module monitoring 'br/public:avm/res/insights/component:0.6.0' = {
   name: '${uniqueString(deployment().name, location)}-appinsights'
   scope: rg

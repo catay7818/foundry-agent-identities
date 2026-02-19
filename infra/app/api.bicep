@@ -5,8 +5,8 @@ param tags object = {}
 param applicationInsightsName string = ''
 param appServicePlanId string
 param appSettings object = {}
-param runtimeName string 
-param runtimeVersion string 
+param runtimeName string
+param runtimeVersion string
 param serviceName string = 'api'
 param storageAccountName string
 param deploymentStorageContainerName string
@@ -23,6 +23,12 @@ param enableFile bool = false
 @allowed(['SystemAssigned', 'UserAssigned'])
 param identityType string = 'UserAssigned'
 
+// Entra ID authentication parameters
+param enableEntraAuth bool = false
+param entraAuthClientId string = ''
+param entraAuthTenantId string = subscription().tenantId
+param entraAuthAllowedAudiences array = []
+
 var applicationInsightsIdentity = 'ClientId=${identityClientId};Authorization=AAD'
 var kind = 'functionapp,linux'
 
@@ -31,7 +37,7 @@ var baseAppSettings = {
   // Only include required credential settings unconditionally
   AzureWebJobsStorage__credential: 'managedidentity'
   AzureWebJobsStorage__clientId: identityClientId
-  
+
   // Application Insights settings are always included
   APPLICATIONINSIGHTS_AUTHENTICATION_STRING: applicationInsightsIdentity
   APPLICATIONINSIGHTS_CONNECTION_STRING: applicationInsights.properties.ConnectionString
@@ -83,7 +89,7 @@ module api 'br/public:avm/res/web/site:0.15.1' = {
           value: '${stg.properties.primaryEndpoints.blob}${deploymentStorageContainerName}'
           authentication: {
             type: identityType == 'SystemAssigned' ? 'SystemAssignedIdentity' : 'UserAssignedIdentity'
-            userAssignedIdentityResourceId: identityType == 'UserAssigned' ? identityId : '' 
+            userAssignedIdentityResourceId: identityType == 'UserAssigned' ? identityId : ''
           }
         }
       }
@@ -101,6 +107,29 @@ module api 'br/public:avm/res/web/site:0.15.1' = {
     }
     virtualNetworkSubnetId: !empty(virtualNetworkSubnetId) ? virtualNetworkSubnetId : null
     appSettingsKeyValuePairs: allAppSettings
+    authSettingV2Configuration: enableEntraAuth ? {
+      platform: {
+        enabled: true
+      }
+      globalValidation: {
+        requireAuthentication: true
+        unauthenticatedClientAction: 'Return401'
+      }
+      identityProviders: {
+        azureActiveDirectory: {
+          enabled: true
+          registration: {
+            clientId: entraAuthClientId
+            openIdIssuer: 'https://sts.windows.net/${entraAuthTenantId}/'
+          }
+          validation: {
+            allowedAudiences: !empty(entraAuthAllowedAudiences) ? entraAuthAllowedAudiences : [
+              'api://${entraAuthClientId}'
+            ]
+          }
+        }
+      }
+    } : null
   }
 }
 

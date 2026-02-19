@@ -13,6 +13,15 @@
     },
     "vnetEnabled": {
       "value": "${VNET_ENABLED}"
+    },
+    "enableEntraAuth": {
+      "value": "${ENABLE_ENTRA_AUTH}"
+    },
+    "entraAuthClientId": {
+      "value": "${ENTRA_AUTH_CLIENT_ID}"
+    },
+    "entraAuthTenantId": {
+      "value": "${AZURE_TENANT_ID}"
     }
   }
 }
