@@ -1,0 +1,4 @@
+name: Remote
+variables:
+  - name: functionAppHost
+    value: https://func-api-pieyj7uujdyyo.azurewebsites.net

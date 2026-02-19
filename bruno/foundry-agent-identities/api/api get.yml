@@ -5,7 +5,7 @@ info:
 
 http:
   method: GET
-  url: http://localhost:7071/api/httpget
+  url: "{{functionAppHost}}/api/httpget"
   auth: inherit
 
 settings:

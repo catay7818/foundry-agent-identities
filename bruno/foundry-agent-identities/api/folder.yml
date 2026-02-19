@@ -1,0 +1,28 @@
+info:
+  name: api
+  type: folder
+  seq: 1
+
+request:
+  auth:
+    type: oauth2
+    flow: authorization_code
+    authorizationUrl: https://login.microsoftonline.com/5113c164-f41a-4f8a-aaae-96d81e693b93/oauth2/v2.0/authorize
+    accessTokenUrl: https://login.microsoftonline.com/5113c164-f41a-4f8a-aaae-96d81e693b93/oauth2/token
+    credentials:
+      clientId: 41199aa4-83a2-41a5-992d-4bf569be5e8b
+      placement: basic_auth_header
+    additionalParameters:
+      accessTokenRequest:
+        - name: origin
+          placement: header
+          value: https://oauth.usebruno.com
+    scope: api://58a11a9b-581d-4d66-a8fc-e2ebbf0a4e26/all
+    pkce: {}
+    tokenConfig:
+      id: credentials
+      placement:
+        header: Bearer
+    settings:
+      autoFetchToken: false
+      autoRefreshToken: false
