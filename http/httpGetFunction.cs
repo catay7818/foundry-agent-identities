@@ -15,16 +15,16 @@ namespace Company.Function
         }
 
         [Function("httpget")]
-        public IActionResult Run([HttpTrigger(AuthorizationLevel.Function, "get")]
+        public IActionResult Run([HttpTrigger(AuthorizationLevel.Anonymous, "get")]
           HttpRequest req,
           string name)
         {
             var returnValue = string.IsNullOrEmpty(name)
                 ? "Hello, World."
                 : $"Hello, {name}.";
- 
+
             _logger.LogInformation($"C# HTTP trigger function processed a request for {returnValue}.");
- 
+
             return new OkObjectResult(returnValue);
         }
     }
